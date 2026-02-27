@@ -11,6 +11,7 @@
 :root{
   --bg:#18120e;
   --panel:#2b2019;
+  --panel-dark:#221912;
   --accent:#c58a2b;
   --label:#efe4d2;
   --text:#f3eee6;
@@ -28,35 +29,15 @@ body{
   color:var(--text);
 }
 
-.screen{
-  position:absolute;
-  inset:0;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  flex-direction:column;
-  text-align:center;
-  padding:40px;
-  background:#140f0c;
-}
-
-.hidden{display:none}
-
-button{
-  background:var(--accent);
-  border:none;
-  padding:10px 20px;
-  margin:6px;
-  font-family:"IBM Plex Mono",monospace;
-  cursor:pointer;
-}
-
 .cassette{
-  width:min(420px,92vw);
-  background:linear-gradient(145deg,#2b2019,#221912);
+  width:min(440px,92vw);
+  background:linear-gradient(145deg,var(--panel),var(--panel-dark));
   border-radius:18px;
-  padding:28px;
-  text-align:center;
+  padding:26px;
+  box-shadow:
+    inset 0 4px 8px rgba(255,255,255,0.05),
+    inset 0 -8px 16px rgba(0,0,0,0.6),
+    0 30px 60px rgba(0,0,0,0.8);
 }
 
 .label{
@@ -67,23 +48,88 @@ button{
   font-size:12px;
   border-radius:4px;
   margin-bottom:16px;
+  text-align:center;
+  letter-spacing:1px;
+}
+
+.window{
+  background:#0f0b09;
+  border-radius:12px;
+  height:130px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:20px;
+  position:relative;
+  margin-bottom:20px;
+}
+
+.ribbon{
+  position:absolute;
+  height:3px;
+  background:var(--accent);
+  left:15%;
+  right:15%;
+  top:50%;
+  transform:translateY(-50%);
+  opacity:0.6;
+}
+
+.reel{
+  width:80px;height:80px;
+  border-radius:50%;
+  border:2px solid var(--accent);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  transition:transform .2s linear;
+}
+
+.teeth{
+  width:70%;height:70%;
+  border-radius:50%;
+  border:6px dashed var(--accent);
+}
+
+.rotating{
+  animation:spin 3s linear infinite;
+}
+
+@keyframes spin{
+  from{transform:rotate(0)}
+  to{transform:rotate(360deg)}
 }
 
 .meta{
-  margin-top:18px;
-  font-size:15px;
+  text-align:center;
+  margin-bottom:12px;
+}
+
+.controls{
+  display:flex;
+  justify-content:center;
+  gap:16px;
+  margin-bottom:10px;
+}
+
+button{
+  background:var(--accent);
+  border:none;
+  padding:8px 14px;
+  font-family:"IBM Plex Mono",monospace;
+  cursor:pointer;
 }
 
 .tracklist{
-  margin-top:14px;
-  max-height:140px;
+  max-height:120px;
   overflow:auto;
   font-size:13px;
   opacity:.8;
+  text-align:center;
 }
 .tracklist div{
   cursor:pointer;
-  padding:4px;
+  padding:3px;
 }
 .tracklist div:hover{
   color:var(--accent);
@@ -93,28 +139,19 @@ button{
 
 <body>
 
-<div class="screen" id="intro">
-  <div>This is something I made for you.</div>
-  <button onclick="showTutorial()">Continue</button>
-</div>
-
-<div class="screen hidden" id="tutorial">
-  <div style="max-width:400px">
-    This is a digital cassette.<br><br>
-    It plays from the first song to the last.<br>
-    But if it ever gets stuck, you can switch songs.<br><br>
-    Press play and let it run.
-  </div>
-  <button onclick="startCassette()">Insert Tape</button>
-</div>
-
-<div class="cassette hidden" id="cassette">
+<div class="cassette">
 
   <div class="label">SIDE A — FOR RIYA</div>
 
+  <div class="window">
+    <div class="reel" id="leftReel"><div class="teeth"></div></div>
+    <div class="ribbon"></div>
+    <div class="reel" id="rightReel"><div class="teeth"></div></div>
+  </div>
+
   <div class="meta" id="trackMeta"></div>
 
-  <div>
+  <div class="controls">
     <button onclick="prevTrack()">PREV</button>
     <button onclick="togglePlay()" id="playBtn">PLAY</button>
     <button onclick="nextTrack()">NEXT</button>
@@ -128,8 +165,6 @@ button{
 <audio id="hiss" src="sounds/hiss.mp3"></audio>
 
 <script>
-const CROSSFADE = 6;
-
 const playlist = [
  {title:"we're fucked, it's fine",src:"songs/we're fucked, it's fine.mp3"},
  {title:"Stay Down",src:"songs/Stay Down.mp3"},
@@ -145,35 +180,13 @@ const playlist = [
 
 let index = 0;
 let playing = false;
-let fadeInterval;
+let reelAnimation;
 
 const audio = document.getElementById("audio");
 const meta = document.getElementById("trackMeta");
 const playBtn = document.getElementById("playBtn");
-const hiss = document.getElementById("hiss");
-
-function showTutorial(){
-  intro.classList.add("hidden");
-  tutorial.classList.remove("hidden");
-}
-
-function startCassette(){
-  tutorial.classList.add("hidden");
-  cassette.classList.remove("hidden");
-  buildTrackList();
-  loadTrack(index);
-}
-
-function buildTrackList(){
-  const container = document.getElementById("trackList");
-  container.innerHTML = "";
-  playlist.forEach((track,i)=>{
-    const div = document.createElement("div");
-    div.textContent = (i+1) + ". " + track.title;
-    div.onclick = ()=>{ index = i; loadTrack(index); if(playing) audio.play(); };
-    container.appendChild(div);
-  });
-}
+const leftReel = document.getElementById("leftReel");
+const rightReel = document.getElementById("rightReel");
 
 function loadTrack(i){
   audio.src = encodeURI(playlist[i].src);
@@ -181,65 +194,70 @@ function loadTrack(i){
   meta.textContent = "Track " + String(i+1).padStart(2,"0") + " — " + playlist[i].title;
 }
 
-function fadeOut(callback){
-  clearInterval(fadeInterval);
-  fadeInterval = setInterval(()=>{
-    if(audio.volume > 0.05){
-      audio.volume -= 0.05;
-    } else {
-      clearInterval(fadeInterval);
-      callback();
-    }
-  },50);
-}
-
-function fadeIn(){
-  audio.volume = 0;
-  fadeInterval = setInterval(()=>{
-    if(audio.volume < 0.95){
-      audio.volume += 0.05;
-    } else {
-      clearInterval(fadeInterval);
-    }
-  },50);
-}
-
-function nextTrack(){
-  if(index < playlist.length - 1){
-    fadeOut(()=>{
-      index++;
+function buildTrackList(){
+  const container = document.getElementById("trackList");
+  playlist.forEach((track,i)=>{
+    const div = document.createElement("div");
+    div.textContent = (i+1)+". "+track.title;
+    div.onclick = ()=>{
+      index=i;
       loadTrack(index);
-      audio.play();
-      fadeIn();
-    });
-  }
-}
-
-function prevTrack(){
-  if(index > 0){
-    fadeOut(()=>{
-      index--;
-      loadTrack(index);
-      audio.play();
-      fadeIn();
-    });
-  }
+      if(playing) audio.play();
+    };
+    container.appendChild(div);
+  });
 }
 
 function togglePlay(){
   if(!playing){
-    playing = true;
-    playBtn.textContent = "PAUSE";
-    hiss.play();
+    playing=true;
+    playBtn.textContent="PAUSE";
     audio.play();
-  } else {
-    playing = false;
-    playBtn.textContent = "PLAY";
+    leftReel.classList.add("rotating");
+    rightReel.classList.add("rotating");
+    animateReels();
+  }else{
+    playing=false;
+    playBtn.textContent="PLAY";
     audio.pause();
+    leftReel.classList.remove("rotating");
+    rightReel.classList.remove("rotating");
+    cancelAnimationFrame(reelAnimation);
   }
 }
 
-audio.addEventListener("ended", nextTrack);
+function nextTrack(){
+  if(index<playlist.length-1){
+    index++;
+    loadTrack(index);
+    if(playing) audio.play();
+  }
+}
+
+function prevTrack(){
+  if(index>0){
+    index--;
+    loadTrack(index);
+    if(playing) audio.play();
+  }
+}
+
+audio.addEventListener("ended",nextTrack);
+
+function animateReels(){
+  if(!playing) return;
+
+  if(audio.duration){
+    const progress = audio.currentTime / audio.duration;
+    leftReel.style.transform = `scale(${1-progress*0.3})`;
+    rightReel.style.transform = `scale(${0.7+progress*0.3})`;
+  }
+
+  reelAnimation = requestAnimationFrame(animateReels);
+}
+
+loadTrack(index);
+buildTrackList();
 </script>
 
 </body>
