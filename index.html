@@ -189,26 +189,15 @@ const playlist = [
 ];
 
 let index = 0;
+let current = document.getElementById("audioA");
+let next = document.getElementById("audioB");
 let isPlaying = false;
-let crossfadeStarted = false;
-let monitor = null;
-
-const audioA = document.getElementById("audioA");
-const audioB = document.getElementById("audioB");
-let current = audioA;
-let next = audioB;
+let crossfadeTimeout = null;
 
 const playBtn = document.getElementById("playBtn");
 const rewBtn = document.getElementById("rewBtn");
 const meta = document.getElementById("trackMeta");
 const hiss = document.getElementById("hiss");
-const leftReel = document.getElementById("leftReel");
-const rightReel = document.getElementById("rightReel");
-
-document.getElementById("intro").onclick = () => {
-  document.getElementById("intro").classList.add("hidden");
-  document.getElementById("cassette").classList.remove("hidden");
-};
 
 function loadTrack(i, audio){
   audio.src = encodeURI(playlist[i].src);
@@ -218,78 +207,87 @@ function loadTrack(i, audio){
 
 function equalPowerFade(outgoing, incoming, duration){
   const start = performance.now();
+
   function frame(now){
     let t = (now - start) / (duration * 1000);
     if(t > 1) t = 1;
+
     outgoing.volume = Math.cos(t * 0.5 * Math.PI);
     incoming.volume = Math.cos((1 - t) * 0.5 * Math.PI);
+
     if(t < 1) requestAnimationFrame(frame);
   }
+
   requestAnimationFrame(frame);
 }
 
-function startMonitor(){
-  monitor = setInterval(() => {
-    if(!current.duration || isNaN(current.duration)) return;
+function scheduleCrossfade(){
+  if(index >= playlist.length - 1) return;
 
-    const timeLeft = current.duration - current.currentTime;
+  const fadeStartTime = (current.duration - CROSSFADE) * 1000;
 
-    if(timeLeft <= CROSSFADE && !crossfadeStarted && index < playlist.length - 1){
-      crossfadeStarted = true;
-      index++;
+  crossfadeTimeout = setTimeout(() => {
+    index++;
 
-      loadTrack(index, next);
-      next.volume = 0;
+    loadTrack(index, next);
+    next.volume = 0;
+    next.play();
 
-      next.onloadedmetadata = () => {
-        next.play();
-        equalPowerFade(current, next, CROSSFADE);
+    equalPowerFade(current, next, CROSSFADE);
 
-        setTimeout(() => {
-          current.pause();
-          current.currentTime = 0;
-          current.volume = 1;
-          [current, next] = [next, current];
-          crossfadeStarted = false;
-        }, CROSSFADE * 1000);
-      };
-    }
+    setTimeout(() => {
+      current.pause();
+      current.currentTime = 0;
+      current.volume = 1;
 
-    if(index === playlist.length - 1 && current.ended){
-      pause();
-      meta.textContent = "Side A Complete";
-      clearInterval(monitor);
-    }
+      [current, next] = [next, current];
 
-  }, 200);
+      scheduleCrossfade(); // schedule next track
+
+    }, CROSSFADE * 1000);
+
+  }, fadeStartTime);
 }
 
 function play(){
+  if(isPlaying) return;
+
   isPlaying = true;
   playBtn.textContent = "PAUSE";
   hiss.play();
-  leftReel.classList.add("rotating");
-  rightReel.classList.add("rotating");
+
   current.play();
-  startMonitor();
+
+  current.onloadedmetadata = () => {
+    scheduleCrossfade();
+  };
+
+  current.onended = () => {
+    if(index === playlist.length - 1){
+      meta.textContent = "Side A Complete";
+      pause();
+    }
+  };
 }
 
 function pause(){
   isPlaying = false;
   playBtn.textContent = "PLAY";
   current.pause();
-  leftReel.classList.remove("rotating");
-  rightReel.classList.remove("rotating");
-  clearInterval(monitor);
+  clearTimeout(crossfadeTimeout);
 }
 
 function rewind(){
   pause();
   index = 0;
+  clearTimeout(crossfadeTimeout);
+
   current.pause();
   next.pause();
+
   current.currentTime = 0;
   current.volume = 1;
+
   loadTrack(index, current);
 }
 
