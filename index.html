@@ -27,14 +27,17 @@
 
 body{
   min-height:100vh;
+  min-height:100dvh;
   display:flex;
   align-items:center;
   justify-content:center;
   font-family:Inter,sans-serif;
   color:var(--text);
-  overflow:hidden;
+  overflow-x:hidden;
+  overflow-y:auto;
   background:linear-gradient(120deg,var(--bg1),var(--bg2));
   position:relative;
+  padding:28px 12px;
 }
 
 body::before,
@@ -81,6 +84,74 @@ body::after{
   animation:floatScene 6s ease-in-out infinite;
   position:relative;
   z-index:1;
+}
+
+@media (max-width:640px){
+  body{
+    align-items:center;
+    justify-content:center;
+    padding:14px 10px;
+  }
+
+  body::before,
+  body::after{
+    display:none;
+    animation:none;
+  }
+
+  .scene{
+    width:min(440px,100%);
+    margin-inline:auto;
+    padding:10px;
+    border-radius:20px;
+    backdrop-filter:none;
+    background:rgba(22,10,18,.28);
+    animation:none;
+  }
+
+  .cassette{
+    padding:18px 14px;
+    border-radius:18px;
+  }
+
+  .window{
+    height:128px;
+    padding:14px;
+    border-radius:12px;
+  }
+
+  .reel{
+    width:70px;
+    height:70px;
+  }
+
+  .meta{
+    font-size:13px;
+    line-height:1.4;
+    margin-bottom:14px;
+  }
+
+  .controls{
+    gap:8px;
+  }
+
+  button{
+    padding:10px 14px;
+    min-width:92px;
+    font-size:10px;
+  }
+
+  .tracklist{
+    max-height:180px;
+    font-size:11px;
+    padding:2px 6px;
+  }
+
+  .hint{
+    font-size:10px;
+    line-height:1.35;
+    margin-top:8px;
+  }
 }
 
 @keyframes floatScene{
