@@ -18,6 +18,13 @@
 
   --rose-gold:#e0a9bf;
   --rose-metal:#ca88a4;
+  --button1:#ecbfd0;
+  --button2:#cc8ca7;
+  --scene-bg:rgba(22,10,18,.42);
+  --scene-bg-mobile:rgba(22,10,18,.28);
+  --window-bg:#150b13;
+  --tracklist-active:rgba(224,169,191,.22);
+  --tracklist-hover:rgba(255,255,255,.08);
 
   --label:#fff6f0;
   --text:#f8eef4;
@@ -35,7 +42,7 @@ body{
   color:var(--text);
   overflow-x:hidden;
   overflow-y:auto;
-  background:linear-gradient(120deg,var(--bg1),var(--bg2));
+  background:linear-gradient(135deg,var(--bg1),var(--bg3) 52%,var(--bg2));
   position:relative;
   padding:28px 12px;
 }
@@ -78,7 +85,7 @@ body::after{
   padding:24px;
   border-radius:28px;
   backdrop-filter:blur(8px);
-  background:rgba(22,10,18,.42);
+  background:var(--scene-bg);
   border:1px solid rgba(255,255,255,.09);
   box-shadow:0 28px 80px rgba(0,0,0,.5);
   animation:floatScene 6s ease-in-out infinite;
@@ -105,7 +112,7 @@ body::after{
     padding:10px;
     border-radius:20px;
     backdrop-filter:none;
-    background:rgba(22,10,18,.28);
+    background:var(--scene-bg-mobile);
     animation:none;
   }
 
@@ -194,7 +201,7 @@ body::after{
 }
 
 .window{
-  background:#150b13;
+  background:var(--window-bg);
   border-radius:16px;
   height:155px;
   display:flex;
@@ -286,7 +293,7 @@ body::after{
 }
 
 button{
-  background:linear-gradient(145deg,#ecbfd0,#cc8ca7);
+  background:linear-gradient(145deg,var(--button1),var(--button2));
   border:none;
   padding:9px 18px;
   font-family:"IBM Plex Mono",monospace;
@@ -321,12 +328,12 @@ button:active{transform:scale(.95)}
 
 .tracklist div:hover{
   color:#ffeaf2;
-  background:rgba(255,255,255,.08);
+  background:var(--tracklist-hover);
   transform:translateX(2px);
 }
 
 .tracklist .locked{opacity:.65}
-.tracklist .active{background:rgba(224,169,191,.22)}
+.tracklist .active{background:var(--tracklist-active)}
 
 .hint{
   margin-top:10px;
@@ -401,6 +408,100 @@ const meta = document.getElementById("trackMeta");
 const playBtn = document.getElementById("playBtn");
 const cassetteLabel = document.getElementById("cassetteLabel");
 const cassette = document.getElementById("cassette");
+
+const themes = [
+  {
+    name:"Cotton Candy",
+    bg1:"#3d1530",bg2:"#170a1b",bg3:"#5c2b50",
+    cassetteMain:"#4a2039",cassetteDark:"#27111f",
+    roseGold:"#f6bdd7",roseMetal:"#d88eb4",
+    button1:"#ffd2e4",button2:"#dd96ba",
+    label:"#fff5fb",text:"#fff0f8",
+    sceneBg:"rgba(33,12,27,.46)",sceneBgMobile:"rgba(33,12,27,.3)",
+    windowBg:"#1b0c17",tracklistActive:"rgba(246,189,215,.24)",tracklistHover:"rgba(255,214,232,.12)"
+  },
+  {
+    name:"Lilac Kiss",
+    bg1:"#2f1439",bg2:"#12081b",bg3:"#4d2a65",
+    cassetteMain:"#41224f",cassetteDark:"#22132b",
+    roseGold:"#efc3ff",roseMetal:"#c78fe9",
+    button1:"#f5d5ff",button2:"#c98ae6",
+    label:"#fff7ff",text:"#f9efff",
+    sceneBg:"rgba(26,11,36,.46)",sceneBgMobile:"rgba(26,11,36,.3)",
+    windowBg:"#170d22",tracklistActive:"rgba(239,195,255,.24)",tracklistHover:"rgba(242,220,255,.12)"
+  },
+  {
+    name:"Berry Pop",
+    bg1:"#48142f",bg2:"#1a0913",bg3:"#742f67",
+    cassetteMain:"#5b2347",cassetteDark:"#2d1023",
+    roseGold:"#ffb6d0",roseMetal:"#f080b3",
+    button1:"#ffd0e1",button2:"#ec7db0",
+    label:"#fff6fb",text:"#ffeff7",
+    sceneBg:"rgba(37,10,24,.46)",sceneBgMobile:"rgba(37,10,24,.3)",
+    windowBg:"#220c16",tracklistActive:"rgba(255,182,208,.22)",tracklistHover:"rgba(255,212,229,.12)"
+  },
+  {
+    name:"Dreamy Mauve",
+    bg1:"#35203f",bg2:"#150d1b",bg3:"#61426f",
+    cassetteMain:"#493255",cassetteDark:"#25172d",
+    roseGold:"#e8c5f5",roseMetal:"#c69bde",
+    button1:"#f3dcff",button2:"#c89adf",
+    label:"#fff8ff",text:"#f8f0ff",
+    sceneBg:"rgba(30,17,38,.46)",sceneBgMobile:"rgba(30,17,38,.3)",
+    windowBg:"#1a1222",tracklistActive:"rgba(232,197,245,.23)",tracklistHover:"rgba(243,220,255,.12)"
+  },
+  {
+    name:"Rose Quartz",
+    bg1:"#4b1d34",bg2:"#190a13",bg3:"#8f4f75",
+    cassetteMain:"#622744",cassetteDark:"#2f1222",
+    roseGold:"#ffc4db",roseMetal:"#f195ba",
+    button1:"#ffdcea",button2:"#ef99be",
+    label:"#fff7fb",text:"#fff1f7",
+    sceneBg:"rgba(38,13,24,.46)",sceneBgMobile:"rgba(38,13,24,.3)",
+    windowBg:"#210c16",tracklistActive:"rgba(255,196,219,.24)",tracklistHover:"rgba(255,220,234,.12)"
+  },
+  {
+    name:"Violet Bloom",
+    bg1:"#2c1241",bg2:"#100818",bg3:"#5f3187",
+    cassetteMain:"#3d1d59",cassetteDark:"#1f102d",
+    roseGold:"#dcbfff",roseMetal:"#b58ae6",
+    button1:"#edd8ff",button2:"#b784ea",
+    label:"#fcf8ff",text:"#f5efff",
+    sceneBg:"rgba(24,10,37,.46)",sceneBgMobile:"rgba(24,10,37,.3)",
+    windowBg:"#150d21",tracklistActive:"rgba(220,191,255,.24)",tracklistHover:"rgba(237,216,255,.12)"
+  },
+  {
+    name:"Cupid Glow",
+    bg1:"#531a3d",bg2:"#1d0a15",bg3:"#9a4f83",
+    cassetteMain:"#6b2950",cassetteDark:"#341226",
+    roseGold:"#ffcade",roseMetal:"#f09abb",
+    button1:"#ffe0eb",button2:"#ee9ec0",
+    label:"#fff8fc",text:"#fff2f8",
+    sceneBg:"rgba(41,12,27,.46)",sceneBgMobile:"rgba(41,12,27,.3)",
+    windowBg:"#250d18",tracklistActive:"rgba(255,202,222,.23)",tracklistHover:"rgba(255,224,235,.12)"
+  }
+];
+
+function applyRandomTheme(){
+  const theme = themes[Math.floor(Math.random() * themes.length)];
+  const root = document.documentElement;
+  root.style.setProperty("--bg1", theme.bg1);
+  root.style.setProperty("--bg2", theme.bg2);
+  root.style.setProperty("--bg3", theme.bg3);
+  root.style.setProperty("--cassette-main", theme.cassetteMain);
+  root.style.setProperty("--cassette-dark", theme.cassetteDark);
+  root.style.setProperty("--rose-gold", theme.roseGold);
+  root.style.setProperty("--rose-metal", theme.roseMetal);
+  root.style.setProperty("--button1", theme.button1);
+  root.style.setProperty("--button2", theme.button2);
+  root.style.setProperty("--label", theme.label);
+  root.style.setProperty("--text", theme.text);
+  root.style.setProperty("--scene-bg", theme.sceneBg);
+  root.style.setProperty("--scene-bg-mobile", theme.sceneBgMobile);
+  root.style.setProperty("--window-bg", theme.windowBg);
+  root.style.setProperty("--tracklist-active", theme.tracklistActive);
+  root.style.setProperty("--tracklist-hover", theme.tracklistHover);
+}
 
 function maskedTrackName(i){
   if(unlockedTracks[currentSide].has(i)) return playlist[i].title;
@@ -539,6 +640,7 @@ function animateReels(){
   reelAnimation = requestAnimationFrame(animateReels);
 }
 
+applyRandomTheme();
 loadTrack(index);
 buildTrackList();
 </script>
